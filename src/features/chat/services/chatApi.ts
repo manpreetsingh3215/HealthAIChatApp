@@ -85,10 +85,8 @@ const parseSSEStream = async (
 
                 // Call the callback with each chunk for real-time display
                 if (onChunk) {
-                  // Use setTimeout to batch state updates and ensure UI renders
-                  setTimeout(() => {
-                    onChunk(parsed.chunk);
-                  }, 0);
+                  // Call immediately without batching delay for real-time streaming
+                  onChunk(parsed.chunk);
                 }
               }
             } catch (e) {
