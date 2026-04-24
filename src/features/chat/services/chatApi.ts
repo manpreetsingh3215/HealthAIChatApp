@@ -27,9 +27,28 @@ const parseSSEStream = async (
         },
         body: JSON.stringify({ message }),
       });
+      console.log("API response status:", response);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+          // Parse error response body to get detailed error information
+          errorData = await response.json();
+          console.log("API error response data:", errorData);
+        } catch (parseErr) {
+          // If JSON parsing fails, errorData will be undefined
+          console.error("Failed to parse error response:", parseErr);
+        }
+
+        // Create error with attached response
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        (error as any).response = {
+          status: response.status,
+          data: errorData,
+          statusText: response.statusText,
+        };
+        console.log("API error response data:", error);
+        throw error;
       }
 
       // For React Native, use text() method instead of getReader()

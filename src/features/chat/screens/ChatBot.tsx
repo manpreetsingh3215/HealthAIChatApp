@@ -3,7 +3,8 @@
  * Complete chatbot UI with message history, input, and AI integration
  */
 
-import React, { useEffect, useRef } from "react";
+import { ErrorToast } from "@/shared/components/ErrorToast";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -29,8 +30,17 @@ const Chatbot = () => {
     // loadHistory,
     sendMessage,
     clearMessages,
+    clearError,
   } = useChat();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [toastVisible, setToastVisible] = useState(false);
+
+  // Show toast when error occurs
+  useEffect(() => {
+    if (error) {
+      setToastVisible(true);
+    }
+  }, [error]);
 
   // Load chat history on mount
   //   useEffect(() => {
@@ -51,6 +61,14 @@ const Chatbot = () => {
   };
 
   /**
+   * Handle error toast dismiss
+   */
+  const handleDismissError = () => {
+    setToastVisible(false);
+    clearError();
+  };
+
+  /**
    * Clear chat history
    */
   const handleClearChat = async () => {
@@ -59,6 +77,12 @@ const Chatbot = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <ErrorToast
+        visible={toastVisible}
+        message={error?.message || ""}
+        details={error?.details}
+        onDismiss={handleDismissError}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.flex}
@@ -104,12 +128,6 @@ const Chatbot = () => {
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="large" color="#0a7ea4" />
               <Text style={styles.loadingText}>AI is thinking...</Text>
-            </View>
-          )}
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>⚠️ {error}</Text>
             </View>
           )}
         </ScrollView>

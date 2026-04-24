@@ -7,11 +7,79 @@ import { useCallback, useState } from "react";
 import { chatService } from "../services/chatApi";
 import { ChatMessage } from "../types";
 
+export interface ChatError {
+  message: string;
+  details?: string;
+  statusCode?: number;
+}
+
+/**
+ * Parse error from various formats into ChatError object
+ */
+const parseError = (err: any): ChatError => {
+  if (!err) {
+    return { message: "An unknown error occurred" };
+  }
+
+  // Handle HTTP/Axios errors with response
+  if (err.response) {
+    const data = err.response.data;
+
+    // Handle nested error object structure: { error: { message: "...", code: "..." } }
+    if (data?.error?.message) {
+      return {
+        message: data.error.message,
+        details: data.error.code || data.details || err.response.statusText,
+        statusCode: data.statusCode || err.response.status,
+      };
+    }
+
+    // Handle flat error structure: { message: "...", details: "..." }
+    return {
+      message: data?.message || err.message || "API Error",
+      details: data?.details || data?.code || err.response.statusText,
+      statusCode: data?.statusCode || err.response.status,
+    };
+  }
+
+  // Handle network errors
+  if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
+    return {
+      message: "Connection timeout",
+      details: "Request took too long. Please check your internet connection.",
+    };
+  }
+
+  if (err.message?.includes("Network") || err.code === "ENOTFOUND") {
+    return {
+      message: "Network error",
+      details: "Unable to connect. Please check your internet connection.",
+    };
+  }
+
+  // Handle custom error messages
+  if (typeof err === "string") {
+    return { message: err };
+  }
+
+  // Handle error objects with message property
+  if (err.message) {
+    return {
+      message: err.message,
+      details: err.details || err.statusText,
+      statusCode: err.statusCode || err.status,
+    };
+  }
+
+  // Fallback
+  return { message: "An error occurred. Please try again." };
+};
+
 export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<ChatError | null>(null);
 
   /**
    * Load chat history
@@ -19,11 +87,12 @@ export const useChat = () => {
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
-      setError("");
+      setError(null);
       const history = await chatService.getHistory();
       setMessages(history);
     } catch (err: any) {
-      setError(err.message || "Failed to load history");
+      const errorObj = parseError(err);
+      setError(errorObj);
       console.error("Error loading history:", err);
     } finally {
       setLoading(false);
@@ -46,7 +115,7 @@ export const useChat = () => {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput(""); // Clear input immediately after sending
-    setError("");
+    setError(null);
 
     try {
       setLoading(true);
@@ -103,7 +172,8 @@ export const useChat = () => {
         ),
       );
     } catch (err: any) {
-      setError(err.message || "Failed to send message");
+      const errorObj = parseError(err);
+      setError(errorObj);
       console.error("Error sending message:", err);
     } finally {
       setLoading(false);
@@ -118,13 +188,21 @@ export const useChat = () => {
       setLoading(true);
       await chatService.clearHistory();
       setMessages([]);
-      setError("");
+      setError(null);
     } catch (err: any) {
-      setError(err.message || "Failed to clear chat");
+      const errorObj = parseError(err);
+      setError(errorObj);
       console.error("Error clearing chat:", err);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  /**
+   * Clear error state
+   */
+  const clearError = useCallback(() => {
+    setError(null);
   }, []);
 
   return {
@@ -136,5 +214,6 @@ export const useChat = () => {
     loadHistory,
     sendMessage,
     clearMessages,
+    clearError,
   };
 };
