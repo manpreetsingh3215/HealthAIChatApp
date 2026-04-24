@@ -15,94 +15,96 @@ const parseSSEStream = async (
   message: string,
   onChunk?: (chunk: string) => void,
 ): Promise<ChatResponse> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       const baseURL =
         process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-
-      const response = await fetch(`${baseURL}${url}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message }),
-      });
-      console.log("API response status:", response);
-
-      if (!response.ok) {
-        let errorData;
-        try {
-          // Parse error response body to get detailed error information
-          errorData = await response.json();
-          console.log("API error response data:", errorData);
-        } catch (parseErr) {
-          // If JSON parsing fails, errorData will be undefined
-          console.error("Failed to parse error response:", parseErr);
-        }
-
-        // Create error with attached response
-        const error = new Error(`HTTP error! status: ${response.status}`);
-        (error as any).response = {
-          status: response.status,
-          data: errorData,
-          statusText: response.statusText,
-        };
-        console.log("API error response data:", error);
-        throw error;
-      }
-
-      // For React Native, use text() method instead of getReader()
-      const text = await response.text();
-      console.log("Raw response:", text);
-
+      const xhr = new XMLHttpRequest();
       let fullText = "";
-      const lines = text.split("\n");
+      let processedLength = 0;
+      let buffer = "";
+      let streamDone = false;
 
-      // Process each line with a small delay to ensure UI updates
-      for (const line of lines) {
-        console.log("Processing line:", line);
+      const processSSEData = (raw: string) => {
+        buffer += raw;
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6).trim(); // Remove "data: " prefix
+        for (const line of lines) {
+          const trimmedLine = line.trim();
+          if (!trimmedLine.startsWith("data: ")) continue;
+
+          const data = trimmedLine.slice(6).trim();
+          if (!data) continue;
 
           if (data === "[DONE]") {
-            // Stream finished
-            console.log("Stream completed");
-            break;
+            streamDone = true;
+            continue;
           }
 
-          if (data) {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.chunk) {
-                fullText += parsed.chunk;
-                console.log(
-                  "Stream chunk:",
-                  parsed.chunk,
-                  "Full text so far:",
-                  fullText,
-                );
-
-                // Call the callback with each chunk for real-time display
-                if (onChunk) {
-                  // Call immediately without batching delay for real-time streaming
-                  onChunk(parsed.chunk);
-                }
-              }
-            } catch (e) {
-              // Skip invalid JSON
-              console.error("Failed to parse chunk:", data, e);
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.chunk) {
+              const chunk = String(parsed.chunk);
+              fullText += chunk;
+              onChunk?.(chunk);
             }
+          } catch (e) {
+            console.error("Failed to parse chunk:", data, e);
           }
         }
-      }
+      };
 
-      console.log("Final full text:", fullText);
+      xhr.open("POST", `${baseURL}${url}`);
+      xhr.setRequestHeader("Content-Type", "application/json");
 
-      resolve({
-        reply: fullText || "No response received",
-        timestamp: new Date().toISOString(),
-      });
+      xhr.onprogress = () => {
+        const responseChunk = xhr.responseText.slice(processedLength);
+        processedLength = xhr.responseText.length;
+        if (!responseChunk) return;
+        processSSEData(responseChunk);
+      };
+
+      xhr.onerror = () => {
+        reject(new Error("Network request failed"));
+      };
+
+      xhr.onload = () => {
+        if (xhr.status < 200 || xhr.status >= 300) {
+          let errorData;
+          try {
+            errorData = xhr.responseText ? JSON.parse(xhr.responseText) : undefined;
+          } catch (parseErr) {
+            console.error("Failed to parse error response:", parseErr);
+          }
+
+          const error = new Error(`HTTP error! status: ${xhr.status}`);
+          (error as any).response = {
+            status: xhr.status,
+            data: errorData,
+            statusText: xhr.statusText,
+          };
+          reject(error);
+          return;
+        }
+
+        const remaining = xhr.responseText.slice(processedLength);
+        if (remaining) {
+          processSSEData(remaining);
+          processedLength = xhr.responseText.length;
+        }
+
+        if (buffer.trim()) {
+          processSSEData("\n");
+        }
+
+        resolve({
+          reply: fullText || (streamDone ? "" : "No response received"),
+          timestamp: new Date().toISOString(),
+        });
+      };
+
+      xhr.send(JSON.stringify({ message }));
     } catch (error) {
       console.error("SSE Parse Error:", error);
       reject(error);
