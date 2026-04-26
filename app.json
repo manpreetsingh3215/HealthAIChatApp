@@ -1,16 +1,21 @@
 {
   "expo": {
-    "name": "VoiceAIApp",
-    "slug": "VoiceAIApp",
+    "name": "HealthAIChatApp",
+    "slug": "healthaichatapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "voiceaiapp",
+    "scheme": "healthaichatapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.preet3215.VoiceAIApp"
+      "bundleIdentifier": "com.preet3215.VoiceAIApp",
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "Allow HealthAIChatApp to convert speech to text.",
+        "NSMicrophoneUsageDescription": "Allow HealthAIChatApp to use the microphone.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +26,10 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.preet3215.VoiceAIApp"
+      "package": "com.preet3215.VoiceAIApp",
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -32,8 +40,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "Allow VoiceAIApp to use the microphone.",
-          "speechRecognitionPermission": "Allow VoiceAIApp to convert speech to text."
+          "microphonePermission": "Allow HealthAIChatApp to use the microphone.",
+          "speechRecognitionPermission": "Allow HealthAIChatApp to convert speech to text."
         }
       ],
       [
@@ -52,6 +60,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fbefec7c-920e-4a43-8362-d4fbdce4ca2f"
+      }
     }
   }
 }
