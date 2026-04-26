@@ -186,7 +186,7 @@ export const useChat = () => {
   const clearMessages = useCallback(async () => {
     try {
       setLoading(true);
-      await chatService.clearHistory();
+      // await chatService.clearHistory();
       setMessages([]);
       setError(null);
     } catch (err: any) {

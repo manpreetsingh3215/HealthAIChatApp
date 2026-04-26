@@ -18,7 +18,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <View style={styles.header}>
       <View>
-        <Text style={styles.title}>VoiceAI Chat</Text>
+        <Text style={styles.title}>FitnessAI Chat</Text>
         <Text style={styles.subtitle}>{messageCount} messages</Text>
       </View>
       <TouchableOpacity style={styles.clearButton} onPress={onClear}>
