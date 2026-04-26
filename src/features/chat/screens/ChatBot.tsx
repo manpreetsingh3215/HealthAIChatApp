@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -19,6 +18,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { ChatMessage } from "../components/ChatMessage";
 import { useChat } from "../hooks/useChat";
 
@@ -36,6 +39,11 @@ const Chatbot = () => {
   } = useChat();
   const scrollViewRef = useRef<ScrollView>(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const insets = useSafeAreaInsets();
+  const statusBarFillHeight = Math.max(
+    insets.top,
+    Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0,
+  );
 
   // Show toast when error occurs
   useEffect(() => {
@@ -78,90 +86,97 @@ const Chatbot = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.screenRoot}>
       <StatusBar
-        backgroundColor={FitnessColors.secondary}
         barStyle="light-content"
+        backgroundColor={FitnessColors.secondary}
+        translucent={Platform.OS === "android"}
       />
-      <ErrorToast
-        visible={toastVisible}
-        message={error?.message || ""}
-        details={error?.details}
-        onDismiss={handleDismissError}
-      />
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.flex}
+      <View style={[styles.statusBarFill, { height: statusBarFillHeight }]} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["bottom", "left", "right"]}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerTitle}>FitnessAI Chat</Text>
-            <Text style={styles.headerSubtitle}>
-              {messages.length} messages
-            </Text>
-          </View>
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={handleClearChat}
-          >
-            <Text style={styles.clearButtonText}>Clear</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Messages Area */}
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.messagesContainer}
-          showsVerticalScrollIndicator={true}
-          contentContainerStyle={styles.messagesContent}
+        <ErrorToast
+          visible={toastVisible}
+          message={error?.message || ""}
+          details={error?.details}
+          onDismiss={handleDismissError}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.flex}
         >
-          {messages.length === 0 && !loading ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateIcon}>💬</Text>
-              <Text style={styles.emptyStateTitle}>No messages yet</Text>
-              <Text style={styles.emptyStateText}>
-                Start a conversation with AI
+          {/* Header */}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerTitle}>FitnessAI Chat</Text>
+              <Text style={styles.headerSubtitle}>
+                {messages.length} messages
               </Text>
             </View>
-          ) : (
-            messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))
-          )}
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={handleClearChat}
+            >
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+          </View>
 
-          {loading && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0a7ea4" />
-              <Text style={styles.loadingText}>AI is thinking...</Text>
-            </View>
-          )}
-        </ScrollView>
-
-        {/* Input Area */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type your message..."
-            placeholderTextColor="#999"
-            value={input}
-            onChangeText={setInput}
-            multiline
-            editable={!loading}
-          />
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              (!input.trim() || loading) && styles.sendButtonDisabled,
-            ]}
-            onPress={handleSendMessage}
-            disabled={!input.trim() || loading}
+          {/* Messages Area */}
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.messagesContainer}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={styles.messagesContent}
           >
-            <Text style={styles.sendButtonText}>Send</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            {messages.length === 0 && !loading ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateIcon}>💬</Text>
+                <Text style={styles.emptyStateTitle}>No messages yet</Text>
+                <Text style={styles.emptyStateText}>
+                  Start a conversation with AI
+                </Text>
+              </View>
+            ) : (
+              messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))
+            )}
+
+            {loading && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0a7ea4" />
+                <Text style={styles.loadingText}>AI is thinking...</Text>
+              </View>
+            )}
+          </ScrollView>
+
+          {/* Input Area */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type your message..."
+              placeholderTextColor="#999"
+              value={input}
+              onChangeText={setInput}
+              multiline
+              editable={!loading}
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                (!input.trim() || loading) && styles.sendButtonDisabled,
+              ]}
+              onPress={handleSendMessage}
+              disabled={!input.trim() || loading}
+            >
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 };
 
@@ -169,6 +184,13 @@ const Chatbot = () => {
  * Styles
  */
 const styles = StyleSheet.create({
+  screenRoot: {
+    flex: 1,
+    backgroundColor: FitnessColors.background,
+  },
+  statusBarFill: {
+    backgroundColor: FitnessColors.secondary,
+  },
   container: {
     flex: 1,
     backgroundColor: FitnessColors.background,

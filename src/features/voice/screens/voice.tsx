@@ -3,11 +3,14 @@
  * Speech-to-text, then same chat-stream + bubbles as ChatBot
  */
 
+import { ChatMessage } from "@/features/chat/components/ChatMessage";
+import { ErrorToast } from "@/shared/components/ErrorToast";
+import { FitnessColors } from "@/shared/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
-  SafeAreaView,
+  Platform,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -15,9 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { FitnessColors } from "@/shared/constants/theme";
-import { ErrorToast } from "@/shared/components/ErrorToast";
-import { ChatMessage } from "@/features/chat/components/ChatMessage";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useVoiceChat } from "../hooks/useVoiceChat";
 
 const Voice = () => {
@@ -34,6 +35,11 @@ const Voice = () => {
   } = useVoiceChat();
 
   const scrollViewRef = useRef<ScrollView>(null);
+  const insets = useSafeAreaInsets();
+  const statusBarFillHeight = Math.max(
+    insets.top,
+    Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0,
+  );
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -49,96 +55,108 @@ const Voice = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.screenRoot}>
       <StatusBar
-        backgroundColor={FitnessColors.secondary}
         barStyle="light-content"
+        backgroundColor={FitnessColors.secondary}
+        translucent={Platform.OS === "android"}
       />
-      <ErrorToast
-        visible={!!error}
-        message={error?.message || ""}
-        details={error?.details}
-        onDismiss={clearError}
+      <View
+        style={[
+          styles.statusBarFill,
+          { height: statusBarFillHeight },
+        ]}
       />
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.headerTitle}>FitnessAI Voice</Text>
-          <Text style={styles.headerSubtitle}>
-            {messages.length} messages · chat-stream
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.clearButton} onPress={clearMessages}>
-          <Text style={styles.clearButtonText}>Clear</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.messagesContainer}
-        contentContainerStyle={styles.messagesContent}
-        showsVerticalScrollIndicator
-      >
-        {messages.length === 0 && !loading ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateIcon}>🎙️</Text>
-            <Text style={styles.emptyStateTitle}>No messages yet</Text>
-            <Text style={styles.emptyStateText}>
-              Tap the mic and speak — your words go to the same AI chat stream
-              as the text chat.
+      <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+        <ErrorToast
+          visible={!!error}
+          message={error?.message || ""}
+          details={error?.details}
+          onDismiss={clearError}
+        />
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.headerTitle}>FitnessAI Voice</Text>
+            <Text style={styles.headerSubtitle}>
+              {messages.length} messages · chat-stream
             </Text>
           </View>
-        ) : (
-          messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
-          ))
-        )}
+          <TouchableOpacity style={styles.clearButton} onPress={clearMessages}>
+            <Text style={styles.clearButtonText}>Clear</Text>
+          </TouchableOpacity>
+        </View>
 
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#0a7ea4" />
-            <Text style={styles.loadingText}>AI is thinking...</Text>
-          </View>
-        )}
-      </ScrollView>
-
-      <View style={styles.micBar}>
-        {!!interimTranscript && (
-          <Text style={styles.interimText}>{interimTranscript}</Text>
-        )}
-
-        <TouchableOpacity
-          style={[
-            styles.recordButton,
-            isListening && styles.recordButtonActive,
-            loading && styles.recordButtonDisabled,
-          ]}
-          onPress={handleMicPress}
-          disabled={loading}
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.messagesContainer}
+          contentContainerStyle={styles.messagesContent}
+          showsVerticalScrollIndicator
         >
-          <Ionicons
-            name={isListening ? "square" : "mic"}
-            size={36}
-            color={isListening ? "#fff" : FitnessColors.primary}
-          />
-          <Text
+          {messages.length === 0 && !loading ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>🎙️</Text>
+              <Text style={styles.emptyStateTitle}>No messages yet</Text>
+              <Text style={styles.emptyStateText}>
+                Tap the mic and speak — your words go to the same AI chat stream
+                as the text chat.
+              </Text>
+            </View>
+          ) : (
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))
+          )}
+
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0a7ea4" />
+              <Text style={styles.loadingText}>AI is thinking...</Text>
+            </View>
+          )}
+        </ScrollView>
+
+        <View style={styles.micBar}>
+          {!!interimTranscript && (
+            <Text style={styles.interimText}>{interimTranscript}</Text>
+          )}
+
+          <TouchableOpacity
             style={[
-              styles.recordButtonText,
-              isListening && styles.recordButtonTextActive,
+              styles.recordButton,
+              isListening && styles.recordButtonActive,
+              loading && styles.recordButtonDisabled,
             ]}
+            onPress={handleMicPress}
+            disabled={loading}
           >
-            {loading
-              ? "Streaming..."
-              : isListening
-                ? "Stop"
-                : "Speak"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+            <Ionicons
+              name={isListening ? "square" : "mic"}
+              size={36}
+              color={isListening ? "#fff" : FitnessColors.primary}
+            />
+            <Text
+              style={[
+                styles.recordButtonText,
+                isListening && styles.recordButtonTextActive,
+              ]}
+            >
+              {loading ? "Streaming..." : isListening ? "Stop" : "Speak"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screenRoot: {
+    flex: 1,
+    backgroundColor: FitnessColors.background,
+  },
+  statusBarFill: {
+    backgroundColor: FitnessColors.secondary,
+  },
   container: {
     flex: 1,
     backgroundColor: FitnessColors.background,

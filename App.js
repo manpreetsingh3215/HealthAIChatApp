@@ -4,7 +4,12 @@
  */
 
 import RootNavigation from '@/app/navigation';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
-    return <RootNavigation />;
+  return (
+    <SafeAreaProvider>
+      <RootNavigation />
+    </SafeAreaProvider>
+  );
 }
