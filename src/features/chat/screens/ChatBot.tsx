@@ -19,8 +19,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { ChatMessage } from "../components/ChatMessage";
 import { useChat } from "../hooks/useChat";
-import { ChatMessage as ChatMessageType } from "../types";
 
 const Chatbot = () => {
   const {
@@ -126,7 +126,7 @@ const Chatbot = () => {
             </View>
           ) : (
             messages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+              <ChatMessage key={message.id} message={message} />
             ))
           )}
 
@@ -162,39 +162,6 @@ const Chatbot = () => {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
-};
-
-/**
- * Message Bubble Component
- */
-interface MessageBubbleProps {
-  message: ChatMessageType;
-}
-
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isUser = message.role === "user";
-
-  return (
-    <View
-      style={[
-        styles.messageBubbleContainer,
-        isUser ? styles.userContainer : styles.aiContainer,
-      ]}
-    >
-      <View
-        style={[styles.bubble, isUser ? styles.userBubble : styles.aiBubble]}
-      >
-        <Text
-          style={[styles.bubbleText, isUser ? styles.userText : styles.aiText]}
-        >
-          {message.text}
-        </Text>
-        <Text style={styles.timestamp}>
-          {new Date(message.timestamp || "").toLocaleTimeString()}
-        </Text>
-      </View>
-    </View>
   );
 };
 
@@ -267,45 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: FitnessColors.textSecondary,
     textAlign: "center",
-  },
-  messageBubbleContainer: {
-    marginVertical: 8,
-    flexDirection: "row",
-  },
-  userContainer: {
-    justifyContent: "flex-end",
-  },
-  aiContainer: {
-    justifyContent: "flex-start",
-  },
-  bubble: {
-    maxWidth: "80%",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  userBubble: {
-    backgroundColor: FitnessColors.primary,
-    borderBottomRightRadius: 2,
-  },
-  aiBubble: {
-    backgroundColor: FitnessColors.accentAI,
-    borderBottomLeftRadius: 2,
-  },
-  bubbleText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  userText: {
-    color: "#fff",
-  },
-  aiText: {
-    color: "#FFFFFF",
-  },
-  timestamp: {
-    fontSize: 10,
-    marginTop: 4,
-    opacity: 0.6,
   },
   loadingContainer: {
     alignItems: "center",

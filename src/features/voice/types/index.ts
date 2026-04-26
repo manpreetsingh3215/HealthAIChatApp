@@ -11,3 +11,4 @@ export interface TextToSpeechResponse {
   audioUrl: string;
   duration?: number;
 }
+

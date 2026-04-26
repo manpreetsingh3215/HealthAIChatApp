@@ -1,113 +1,139 @@
 /**
  * Voice Feature - Main Screen
- * Voice recording and playback interface
+ * Speech-to-text, then same chat-stream + bubbles as ChatBot
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
+  ActivityIndicator,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { FitnessColors } from "@/shared/constants/theme";
+import { ErrorToast } from "@/shared/components/ErrorToast";
+import { ChatMessage } from "@/features/chat/components/ChatMessage";
+import { useVoiceChat } from "../hooks/useVoiceChat";
 
 const Voice = () => {
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordings, setRecordings] = useState<string[]>([]);
+  const {
+    isListening,
+    loading,
+    interimTranscript,
+    messages,
+    error,
+    startListening,
+    stopListening,
+    clearError,
+    clearMessages,
+  } = useVoiceChat();
 
-  const handleStartRecording = () => {
-    setIsRecording(true);
-    console.log("Recording started");
-  };
+  const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleStopRecording = () => {
-    setIsRecording(false);
-    console.log("Recording stopped");
-    setRecordings((prev) => [...prev, `Recording ${Date.now()}`]);
-  };
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages, loading]);
 
-  const handlePlayRecording = (recordingId: string) => {
-    console.log("Playing recording:", recordingId);
+  const handleMicPress = async () => {
+    if (loading) return;
+    if (isListening) {
+      stopListening();
+      return;
+    }
+    await startListening();
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        backgroundColor={FitnessColors.secondary}
+        barStyle="light-content"
+      />
+      <ErrorToast
+        visible={!!error}
+        message={error?.message || ""}
+        details={error?.details}
+        onDismiss={clearError}
+      />
       <View style={styles.header}>
-        <Text style={styles.title}>Voice Recording</Text>
-        <Text style={styles.subtitle}>Record and transcribe audio</Text>
+        <View>
+          <Text style={styles.headerTitle}>FitnessAI Voice</Text>
+          <Text style={styles.headerSubtitle}>
+            {messages.length} messages · chat-stream
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.clearButton} onPress={clearMessages}>
+          <Text style={styles.clearButtonText}>Clear</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        ref={scrollViewRef}
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
+        showsVerticalScrollIndicator
       >
-        {/* Recording Button */}
-        <View style={styles.recordingSection}>
-          <TouchableOpacity
-            style={[
-              styles.recordButton,
-              isRecording && styles.recordButtonActive,
-            ]}
-            onPress={isRecording ? handleStopRecording : handleStartRecording}
-          >
-            <Ionicons
-              name={isRecording ? "square" : "mic"}
-              size={40}
-              color={isRecording ? "#fff" : FitnessColors.primary}
-            />
-            <Text
-              style={[
-                styles.recordButtonText,
-                isRecording && styles.recordButtonTextActive,
-              ]}
-            >
-              {isRecording ? "Stop Recording" : "Start Recording"}
+        {messages.length === 0 && !loading ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateIcon}>🎙️</Text>
+            <Text style={styles.emptyStateTitle}>No messages yet</Text>
+            <Text style={styles.emptyStateText}>
+              Tap the mic and speak — your words go to the same AI chat stream
+              as the text chat.
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        ) : (
+          messages.map((message) => (
+            <ChatMessage key={message.id} message={message} />
+          ))
+        )}
 
-        {/* Recordings List */}
-        <View style={styles.recordingsSection}>
-          <Text style={styles.sectionTitle}>Recordings</Text>
-          {recordings.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="mic-off" size={48} color={FitnessColors.disabled} />
-
-              <Text style={styles.emptyStateText}>No recordings yet</Text>
-            </View>
-          ) : (
-            recordings.map((recording, index) => (
-              <View key={index} style={styles.recordingItem}>
-                <View style={styles.recordingInfo}>
-                  <Ionicons
-                    name="volume-high"
-                    size={24}
-                    color={FitnessColors.primary}
-                  />
-                  <View style={styles.recordingDetails}>
-                    <Text style={styles.recordingName}>{recording}</Text>
-                    <Text style={styles.recordingTime}>0:45</Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  onPress={() => handlePlayRecording(recording)}
-                  style={styles.playButton}
-                >
-                  <Ionicons
-                    name="play-circle"
-                    size={32}
-                    color={FitnessColors.secondary}
-                  />
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#0a7ea4" />
+            <Text style={styles.loadingText}>AI is thinking...</Text>
+          </View>
+        )}
       </ScrollView>
+
+      <View style={styles.micBar}>
+        {!!interimTranscript && (
+          <Text style={styles.interimText}>{interimTranscript}</Text>
+        )}
+
+        <TouchableOpacity
+          style={[
+            styles.recordButton,
+            isListening && styles.recordButtonActive,
+            loading && styles.recordButtonDisabled,
+          ]}
+          onPress={handleMicPress}
+          disabled={loading}
+        >
+          <Ionicons
+            name={isListening ? "square" : "mic"}
+            size={36}
+            color={isListening ? "#fff" : FitnessColors.primary}
+          />
+          <Text
+            style={[
+              styles.recordButtonText,
+              isListening && styles.recordButtonTextActive,
+            ]}
+          >
+            {loading
+              ? "Streaming..."
+              : isListening
+                ? "Stop"
+                : "Speak"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -118,36 +144,94 @@ const styles = StyleSheet.create({
     backgroundColor: FitnessColors.background,
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: FitnessColors.surface,
+    backgroundColor: FitnessColors.secondary,
     borderBottomWidth: 1,
-    borderBottomColor: FitnessColors.border,
+    borderBottomColor: FitnessColors.secondary,
   },
-  title: {
+  headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: FitnessColors.textPrimary,
+    color: "#FFFFFF",
   },
-  subtitle: {
+  headerSubtitle: {
     fontSize: 12,
-    color: FitnessColors.textSecondary,
+    color: "rgba(255,255,255,0.85)",
     marginTop: 2,
   },
-  content: {
+  clearButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 6,
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  messagesContainer: {
     flex: 1,
+    paddingHorizontal: 12,
   },
-  contentContainer: {
-    padding: 16,
+  messagesContent: {
+    paddingVertical: 12,
+    flexGrow: 1,
   },
-  recordingSection: {
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 32,
+    paddingVertical: 40,
+    paddingHorizontal: 16,
+  },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyStateTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: FitnessColors.textPrimary,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: FitnessColors.textSecondary,
+    textAlign: "center",
+  },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  loadingText: {
+    marginTop: 8,
+    color: FitnessColors.textSecondary,
+    fontSize: 12,
+  },
+  micBar: {
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: FitnessColors.surface,
+    borderTopWidth: 1,
+    borderTopColor: FitnessColors.border,
+  },
+  interimText: {
+    fontSize: 13,
+    color: FitnessColors.textSecondary,
+    textAlign: "center",
+    marginBottom: 10,
+    alignSelf: "stretch",
   },
   recordButton: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: FitnessColors.muted,
     borderWidth: 2,
     borderColor: FitnessColors.primary,
@@ -158,8 +242,11 @@ const styles = StyleSheet.create({
     backgroundColor: FitnessColors.accentAI,
     borderColor: FitnessColors.accentAI,
   },
+  recordButtonDisabled: {
+    opacity: 0.7,
+  },
   recordButtonText: {
-    marginTop: 8,
+    marginTop: 6,
     fontSize: 12,
     fontWeight: "600",
     color: FitnessColors.primary,
@@ -167,58 +254,6 @@ const styles = StyleSheet.create({
   },
   recordButtonTextActive: {
     color: "#fff",
-  },
-  recordingsSection: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: FitnessColors.textPrimary,
-    marginBottom: 12,
-  },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 32,
-  },
-  emptyStateText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: FitnessColors.textSecondary,
-  },
-  recordingItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: FitnessColors.surface,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: FitnessColors.border,
-  },
-  recordingInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  recordingDetails: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  recordingName: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: FitnessColors.textPrimary,
-  },
-  recordingTime: {
-    fontSize: 12,
-    color: FitnessColors.textSecondary,
-    marginTop: 2,
-  },
-  playButton: {
-    padding: 8,
   },
 });
 
