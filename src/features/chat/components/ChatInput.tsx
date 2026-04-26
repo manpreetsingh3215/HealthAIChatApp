@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { FitnessColors } from "@/shared/constants/theme";
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -37,7 +38,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <TextInput
         style={[styles.input]}
         placeholder="Type your message..."
-        placeholderTextColor="#999"
+        placeholderTextColor={FitnessColors.textSecondary}
         value={input}
         onChangeText={setInput}
         multiline
@@ -63,22 +64,22 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: "#fff",
+    backgroundColor: FitnessColors.surface,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: FitnessColors.border,
   },
   input: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: FitnessColors.muted,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginRight: 8,
     fontSize: 14,
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
   },
   sendButton: {
-    backgroundColor: "#0a7ea4",
+    backgroundColor: FitnessColors.secondary,
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: FitnessColors.disabled,
     opacity: 0.6,
   },
   sendButtonText: {

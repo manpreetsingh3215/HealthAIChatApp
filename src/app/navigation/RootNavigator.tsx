@@ -8,6 +8,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import { FitnessColors } from "@/shared/constants/theme";
 
 // Feature Screens
 import ChatbotScreen from "../../features/chat/screens/ChatBot";
@@ -44,11 +45,12 @@ const ChatStackNavigator = () => {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: FitnessColors.surface,
         },
-        headerTintColor: "#0a7ea4",
+        headerTintColor: FitnessColors.primary,
         headerTitleStyle: {
           fontWeight: "bold",
+          color: FitnessColors.textPrimary,
         },
       }}
     >
@@ -80,11 +82,12 @@ const VoiceStackNavigator = () => {
       screenOptions={{
         headerShown: true,
         headerStyle: {
-          backgroundColor: "#fff",
+          backgroundColor: FitnessColors.surface,
         },
-        headerTintColor: "#0a7ea4",
+        headerTintColor: FitnessColors.secondary,
         headerTitleStyle: {
           fontWeight: "bold",
+          color: FitnessColors.textPrimary,
         },
       }}
     >
@@ -128,11 +131,11 @@ const TabNavigator = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#0a7ea4",
-        tabBarInactiveTintColor: "#999",
+        tabBarActiveTintColor: FitnessColors.primary,
+        tabBarInactiveTintColor: FitnessColors.textSecondary,
         tabBarStyle: {
-          backgroundColor: "#fff",
-          borderTopColor: "#e0e0e0",
+          backgroundColor: FitnessColors.surface,
+          borderTopColor: FitnessColors.border,
         },
       })}
     >

@@ -5,6 +5,7 @@
 
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { FitnessColors } from "@/shared/constants/theme";
 import { ChatMessage as ChatMessageType } from "../types";
 
 interface ChatMessageProps {
@@ -58,11 +59,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   userBubble: {
-    backgroundColor: "#0a7ea4",
+    backgroundColor: FitnessColors.primary,
     borderBottomRightRadius: 2,
   },
   aiBubble: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: FitnessColors.accentAI,
     borderBottomLeftRadius: 2,
   },
   text: {
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   aiText: {
-    color: "#11181c",
+    color: "#fff",
   },
   timestamp: {
     fontSize: 10,
@@ -84,6 +85,6 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   aiTimestamp: {
-    color: "#11181c",
+    color: "#fff",
   },
 });

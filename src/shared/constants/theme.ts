@@ -8,14 +8,28 @@ import { Platform } from "react-native";
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
+export const FitnessColors = {
+  primary: "#3A86FF",
+  secondary: "#2EC4B6",
+  accentAI: "#6C63FF",
+  success: "#4CAF50",
+  background: "#F7F9FB",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#6B7280",
+  surface: "#FFFFFF",
+  border: "#E5E7EB",
+  muted: "#EEF2F7",
+  disabled: "#C9CED6",
+} as const;
+
 export const Colors = {
   light: {
-    text: "#11181C",
-    background: "#fff",
-    tint: tintColorLight,
-    icon: "#687076",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
+    text: FitnessColors.textPrimary,
+    background: FitnessColors.background,
+    tint: FitnessColors.primary,
+    icon: FitnessColors.textSecondary,
+    tabIconDefault: FitnessColors.textSecondary,
+    tabIconSelected: FitnessColors.primary,
   },
   dark: {
     text: "#ECEDEE",

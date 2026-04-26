@@ -5,6 +5,7 @@
 
 import { NavigationProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { FitnessColors } from "@/shared/constants/theme";
 
 export type VoiceNavigationParamList = {
   VoiceHome: undefined;
@@ -20,12 +21,13 @@ export const voiceNavigationConfig = {
   screenOptions: {
     headerShown: true,
     headerStyle: {
-      backgroundColor: "#fff",
+      backgroundColor: FitnessColors.surface,
     },
-    headerTintColor: "#0a7ea4",
+    headerTintColor: FitnessColors.secondary,
     headerTitleStyle: {
       fontWeight: "600",
       fontSize: 16,
+      color: FitnessColors.textPrimary,
     },
   },
 };

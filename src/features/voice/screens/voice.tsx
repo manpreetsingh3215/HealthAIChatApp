@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { FitnessColors } from "@/shared/constants/theme";
 
 const Voice = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -56,7 +57,7 @@ const Voice = () => {
             <Ionicons
               name={isRecording ? "square" : "mic"}
               size={40}
-              color={isRecording ? "#fff" : "#0a7ea4"}
+              color={isRecording ? "#fff" : FitnessColors.primary}
             />
             <Text
               style={[
@@ -74,14 +75,19 @@ const Voice = () => {
           <Text style={styles.sectionTitle}>Recordings</Text>
           {recordings.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="mic-off" size={48} color="#ccc" />
+              <Ionicons name="mic-off" size={48} color={FitnessColors.disabled} />
+
               <Text style={styles.emptyStateText}>No recordings yet</Text>
             </View>
           ) : (
             recordings.map((recording, index) => (
               <View key={index} style={styles.recordingItem}>
                 <View style={styles.recordingInfo}>
-                  <Ionicons name="volume-high" size={24} color="#0a7ea4" />
+                  <Ionicons
+                    name="volume-high"
+                    size={24}
+                    color={FitnessColors.primary}
+                  />
                   <View style={styles.recordingDetails}>
                     <Text style={styles.recordingName}>{recording}</Text>
                     <Text style={styles.recordingTime}>0:45</Text>
@@ -91,7 +97,11 @@ const Voice = () => {
                   onPress={() => handlePlayRecording(recording)}
                   style={styles.playButton}
                 >
-                  <Ionicons name="play-circle" size={32} color="#0a7ea4" />
+                  <Ionicons
+                    name="play-circle"
+                    size={32}
+                    color={FitnessColors.secondary}
+                  />
                 </TouchableOpacity>
               </View>
             ))
@@ -105,23 +115,23 @@ const Voice = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: FitnessColors.background,
   },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: FitnessColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: FitnessColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
   },
   subtitle: {
     fontSize: 12,
-    color: "#999",
+    color: FitnessColors.textSecondary,
     marginTop: 2,
   },
   content: {
@@ -138,21 +148,21 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 75,
-    backgroundColor: "#e8f4f8",
+    backgroundColor: FitnessColors.muted,
     borderWidth: 2,
-    borderColor: "#0a7ea4",
+    borderColor: FitnessColors.primary,
     justifyContent: "center",
     alignItems: "center",
   },
   recordButtonActive: {
-    backgroundColor: "#d32f2f",
-    borderColor: "#d32f2f",
+    backgroundColor: FitnessColors.accentAI,
+    borderColor: FitnessColors.accentAI,
   },
   recordButtonText: {
     marginTop: 8,
     fontSize: 12,
     fontWeight: "600",
-    color: "#0a7ea4",
+    color: FitnessColors.primary,
     textAlign: "center",
   },
   recordButtonTextActive: {
@@ -164,7 +174,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
     marginBottom: 12,
   },
   emptyState: {
@@ -174,19 +184,19 @@ const styles = StyleSheet.create({
   emptyStateText: {
     marginTop: 12,
     fontSize: 14,
-    color: "#999",
+    color: FitnessColors.textSecondary,
   },
   recordingItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#fff",
+    backgroundColor: FitnessColors.surface,
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginBottom: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: FitnessColors.border,
   },
   recordingInfo: {
     flexDirection: "row",
@@ -200,11 +210,11 @@ const styles = StyleSheet.create({
   recordingName: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
   },
   recordingTime: {
     fontSize: 12,
-    color: "#999",
+    color: FitnessColors.textSecondary,
     marginTop: 2,
   },
   playButton: {

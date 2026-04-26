@@ -4,6 +4,7 @@
  */
 
 import { ErrorToast } from "@/shared/components/ErrorToast";
+import { FitnessColors } from "@/shared/constants/theme";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,6 +13,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -77,6 +79,10 @@ const Chatbot = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar
+        backgroundColor={FitnessColors.secondary}
+        barStyle="light-content"
+      />
       <ErrorToast
         visible={toastVisible}
         message={error?.message || ""}
@@ -198,7 +204,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: FitnessColors.background,
   },
   flex: {
     flex: 1,
@@ -209,30 +215,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
+    backgroundColor: FitnessColors.secondary,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: FitnessColors.secondary,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#11181c",
+    color: "#FFFFFF",
   },
   headerSubtitle: {
     fontSize: 12,
-    color: "#999",
+    color: "rgba(255,255,255,0.85)",
     marginTop: 2,
   },
   clearButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255,255,255,0.18)",
     borderRadius: 6,
   },
   clearButtonText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#0a7ea4",
+    color: "#FFFFFF",
   },
   messagesContainer: {
     flex: 1,
@@ -254,12 +260,12 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
     marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 14,
-    color: "#999",
+    color: FitnessColors.textSecondary,
     textAlign: "center",
   },
   messageBubbleContainer: {
@@ -279,11 +285,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   userBubble: {
-    backgroundColor: "#0a7ea4",
+    backgroundColor: FitnessColors.primary,
     borderBottomRightRadius: 2,
   },
   aiBubble: {
-    backgroundColor: "#e0e0e0",
+    backgroundColor: FitnessColors.accentAI,
     borderBottomLeftRadius: 2,
   },
   bubbleText: {
@@ -294,7 +300,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   aiText: {
-    color: "#11181c",
+    color: "#FFFFFF",
   },
   timestamp: {
     fontSize: 10,
@@ -307,7 +313,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    color: "#999",
+    color: FitnessColors.textSecondary,
     fontSize: 12,
   },
   errorContainer: {
@@ -320,7 +326,7 @@ const styles = StyleSheet.create({
     borderLeftColor: "#c62828",
   },
   errorText: {
-    color: "#c62828",
+    color: "#B91C1C",
     fontSize: 12,
   },
   inputContainer: {
@@ -328,22 +334,22 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    backgroundColor: "#fff",
+    backgroundColor: FitnessColors.surface,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: FitnessColors.border,
   },
   input: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: FitnessColors.muted,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
     marginRight: 8,
     fontSize: 14,
-    color: "#11181c",
+    color: FitnessColors.textPrimary,
   },
   sendButton: {
-    backgroundColor: "#0a7ea4",
+    backgroundColor: FitnessColors.secondary,
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -351,7 +357,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   sendButtonDisabled: {
-    backgroundColor: "#ccc",
+    backgroundColor: FitnessColors.disabled,
     opacity: 0.6,
   },
   sendButtonText: {
