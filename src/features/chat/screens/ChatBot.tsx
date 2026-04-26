@@ -110,7 +110,7 @@ const Chatbot = () => {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>FitnessAI Chat</Text>
+              <Text style={styles.headerTitle}>Fitness AI Chat</Text>
               <Text style={styles.headerSubtitle}>
                 {messages.length} messages
               </Text>

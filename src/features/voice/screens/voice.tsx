@@ -18,7 +18,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useVoiceChat } from "../hooks/useVoiceChat";
 
 const Voice = () => {
@@ -38,7 +41,7 @@ const Voice = () => {
   const insets = useSafeAreaInsets();
   const statusBarFillHeight = Math.max(
     insets.top,
-    Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0,
+    Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0,
   );
 
   useEffect(() => {
@@ -61,13 +64,11 @@ const Voice = () => {
         backgroundColor={FitnessColors.secondary}
         translucent={Platform.OS === "android"}
       />
-      <View
-        style={[
-          styles.statusBarFill,
-          { height: statusBarFillHeight },
-        ]}
-      />
-      <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+      <View style={[styles.statusBarFill, { height: statusBarFillHeight }]} />
+      <SafeAreaView
+        style={styles.container}
+        edges={["bottom", "left", "right"]}
+      >
         <ErrorToast
           visible={!!error}
           message={error?.message || ""}
@@ -76,7 +77,7 @@ const Voice = () => {
         />
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>FitnessAI Voice</Text>
+            <Text style={styles.headerTitle}>Fitness AI Voice</Text>
             <Text style={styles.headerSubtitle}>
               {messages.length} messages · chat-stream
             </Text>
